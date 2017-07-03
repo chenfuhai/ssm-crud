@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:aop="http://www.springframework.org/schema/aop"
+	xmlns:tx="http://www.springframework.org/schema/tx"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+		http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-4.3.xsd
+		http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-4.3.xsd
+		http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-4.3.xsd">
+	
+	
+	<!-- Spring的配置文件，这里主要配置和业务逻辑有关的 -->
+	
+	<!-- 扫描除了控制器之外的  讲业务逻辑组件全部加入进来 -->
+	<context:component-scan base-package="com.liufeng">
+		<context:exclude-filter type="annotation" expression="org.springframework.stereotype.Controller"/>
+	</context:component-scan>
+	
+	
+	<!-- 先引入这个外部的配置文件 然后就可以在这个文件里面使用美元加大括号提取其中的属性值 -->
+	<context:property-placeholder location="classpath:dbconfig.properties"/>
+	<!-- 1数据源 事物控制 核心业务逻辑组件 -->
+	
+	<bean id ="PooledDataSource" class="com.mchange.v2.c3p0.ComboPooledDataSource">
+		<property name="jdbcUrl" value="${jdbc.jdbcUrl}"></property>
+		<property name="driverClass" value="${jdbc.driverClass}"></property>
+		<property name="user" value="${jdbc.user}"></property>
+		<property name="password" value="${jdbc.password}"></property>
+	</bean>
+	
+	<!-- 2 配置与Mybatis的整合-->
+	
+	<bean id="SqlSessionFactory" class="org.mybatis.spring.SqlSessionFactoryBean">
+		<!-- 指定一个mybatis全局配置文件 -->
+		<property name="configLocation" value="classpath:mybatis-config.xml"></property>
+		<property name="dataSource" ref="PooledDataSource"></property>
+		<property name="mapperLocations" value="classpath:mapper/*.xml"></property>
+	</bean>
+	
+	<!-- 批量插入的sqlsession  时间上会变慢 但是线程安全  -->
+	<bean id="sqlSessionTemplate" class="org.mybatis.spring.SqlSessionTemplate">
+		<constructor-arg name="sqlSessionFactory" ref="SqlSessionFactory"></constructor-arg>
+		<constructor-arg name="executorType" value="BATCH"></constructor-arg>
+	</bean>
+	
+	<!-- 配置扫描器 将mubatis接口的实现(dao下)加入IOC容器 -->
+	<bean class="org.mybatis.spring.mapper.MapperScannerConfigurer">
+		<property name="basePackage" value="com.liufeng.crud.dao"></property>
+	</bean>
+	
+	
+	<!-- 3事物控制的配置  熟练-->
+	
+	<bean  id ="transactionManager" class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
+		<!-- 控制住数据源 开启关闭回滚操作使用这个事物管理器来做 -->
+		<property name="dataSource" ref="PooledDataSource"></property>
+	</bean>
+	
+	<!-- 开启基于注解的事物吗，使用xml形式的事物（主要使用的事配置试） -->
+	<aop:config>
+		<!-- 切入点表达式  -->
+		<aop:pointcut expression="execution(* com.liufeng.crud.service..*(..))" id="txPoint"/>
+		<!-- 配置事物增强 -->
+		<aop:advisor advice-ref="txAdvice" pointcut-ref="txPoint"/>
+	</aop:config>
+	
+	<!-- 配置事物增强 也就是事物如何切入 -->
+	<tx:advice id="txAdvice" transaction-manager="transactionManager">
+		<tx:attributes>
+			<!-- *所有方法都是事物方法 -->
+			<tx:method name="*"/>
+			<!-- get所有方法都是查询方法 -->
+			<tx:method name="get*" read-only="true"/>
+			
+		</tx:attributes>
+	</tx:advice>
+	
+	<!-- Spring 配置的核心 1数据源 与2mybatis的整合 3事物控制的配置 -->
+</beans>
