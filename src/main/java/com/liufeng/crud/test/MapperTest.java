@@ -42,17 +42,17 @@ public class MapperTest {
 //		//2.从容器中获取mapper
 //		DepartmentMapper bean = ioc.getBean(DepartmentMapper.class);
 //	
-		
-		System.out.println(departmentMapper);
+//		
+//		System.out.println(departmentMapper);
 //		
 //		departmentMapper.insertSelective(new Department(null,"IT开发部"));
 //		departmentMapper.insertSelective(new Department(null,"IT产品"));
 //		departmentMapper.insertSelective(new Department(null,"销售部门"));
-//	
-//	
-//		employeeMapper.insertSelective(new Employee(null, "张三", "M", "1169555653@qq.com", 1));
-		
-		//批量插入的SQLsession 这个sqlsession就是或得到的特殊的批量插入session 如果使用原先的EmployeeMapper+for循环的话 效率很低
+////	
+////	
+////		employeeMapper.insertSelective(new Employee(null, "张三", "M", "1169555653@qq.com", 1));
+//		
+//		//批量插入的SQLsession 这个sqlsession就是或得到的特殊的批量插入session 如果使用原先的EmployeeMapper+for循环的话 效率很低
 //		EmployeeMapper mapper = sqlsession.getMapper(EmployeeMapper.class);
 //		long time1 = System.currentTimeMillis();
 //		for(int i=0;i<1000;i++) {
