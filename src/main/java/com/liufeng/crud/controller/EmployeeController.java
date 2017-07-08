@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import com.liufeng.crud.bean.Employee;
+import com.liufeng.crud.bean.Msg;
 import com.liufeng.crud.service.EmployeeService;
 
 /**
@@ -33,7 +34,7 @@ public class EmployeeController {
 	 */
 	@RequestMapping("/emps")
 	@ResponseBody
-	public PageInfo getEmpsWithJson(@RequestParam(value="pn",defaultValue="1")Integer pn) {
+	public Msg getEmpsWithJson(@RequestParam(value="pn",defaultValue="1")Integer pn) {
 		//查询的所有东西
 				//引入pageHelper分页插件
 				//在查询之前 ，只需要调用
@@ -44,7 +45,7 @@ public class EmployeeController {
 				PageInfo page = new PageInfo(emps,5);
 				
 				
-				return page;
+				return Msg.success().add("pageInfo", page);
 	}
 	
 	
