@@ -74,7 +74,44 @@
 			</div>
 		</div>
 		
-		<!-- ================================================ -->
+		<!-- =========================新增员工的模态框======================= -->
+
+<div class="modal fade" id="addModal" tabindex="-1" role="dialog" aria-labelledby="addModalLable" aria-hidden="true">
+	<div class="modal-dialog" >
+		<div class="modal-content">
+			<div class="modal-header">
+				 <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                <h4 class="modal-title" id="addModalLable">添加商品</h4>
+			</div>
+			<div class="modal-body" >
+				<form id="addForm" >
+					<div class="form-group">
+					 <label for="goodName_add">商品名称</label>
+					 <input type="text" class="form-control" id="goodName_add" name="name" placeholder="商品名称">
+					</div>
+					<div class="form-group">
+				    <label for="goodfile_add">配图文件</label>
+				    <input type="file" id="goodfile_add" name="img">
+				    <p class="help-block">在文件框中选择商品的配图文件</p>
+				  </div>
+				  <div class="form-group">
+					 <label for="goodUrl_add">商品链接</label>
+					 <input type="text" class="form-control" id="goodUrl_add" name="goodUrl" placeholder="商品点击链接的URL">
+					</div>
+					<div class="form-group">
+					 <label for="goodDesc_add">详细介绍</label>
+					 <textarea class="form-control" rows="5" id="goodDesc_add" name="name" placeholder="填写商品详细介绍"></textarea>
+					</div>	 		
+				</form>
+			</div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">取消</button>
+                <button type="button" class="btn btn-primary" id="addModalSubmitBtn">保存提交</button>
+            </div>
+		</div>
+	</div>
+</div>	
+	
 	
 	
 	
