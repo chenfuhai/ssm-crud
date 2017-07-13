@@ -1,12 +1,16 @@
 package com.liufeng.crud.bean;
 
+import javax.validation.constraints.Pattern;
+
 public class Employee {
     private Integer empId;
 
+    @Pattern(regexp = "^[a-zA-Z0-9\\u2E80-\\u9FFF_-]{3,16}$",message="用户名只能是3-16个中文英文数字组合")
     private String empName;
 
     private String gender;
-
+    
+    @Pattern(regexp = "^[a-z\\d]+(\\.[a-z\\d]+)*@([\\da-z](-[\\da-z])?)+(\\.{1,2}[a-z]+)+$",message="邮箱格式不正确")
     private String email;
 
     private Integer dId;

@@ -93,6 +93,7 @@
 								<div class="col-sm-10">
 									<input type="text" class="form-control" id="empName_add"
 										name="empName" placeholder="员工姓名">
+										<span class="help-block"></span>
 								</div>
 							</div>
 
@@ -100,7 +101,8 @@
 								<label class="col-sm-2 control-label" for="empEmail_add">Email</label>
 								<div class="col-sm-10">
 									<input type="text" class="form-control" id="empEmail_add"
-										name="empEmail" placeholder="Email">
+										name="email" placeholder="Email">
+										<span class="help-block"></span>
 								</div>
 							</div>
 
@@ -119,7 +121,7 @@
 							<div class="form-group">
 								<label class="col-sm-2 control-label">部门</label>
 								<div class="col-sm-4">
-									<select class="form-control" name="dId">
+									<select class="form-control" id="depts" name="dId">
 									</select>
 								</div>
 							</div>
@@ -134,27 +136,143 @@
 				</div>
 			</div>
 		</div>
-<!-- ======================================================== -->
+		<!-- ======================================================== -->
 
 
 
 	</div>
 
 	<script type="text/javascript">
+	 
+		var totalRecords;	
+		var isNameUsed;
 		$(function() {
 			//发送ajax请求  解析数据
 			to_page(1);
 			initBtn();
 		});
 
-		function initBtn(){
-			$("#btnAdd").click(function(){
-				$("#addModal").modal();
-				//发送请求，读取部门列表 显示在select中
+		function initBtn() {
+			$("#btnAdd").click(function() {
+				//在弹出框框之前 应该事先就要到这个全部的部门信息了发送请求，读取部门列表 显示在select中
+				getALLdept();
+				$("#addModal").modal({
+					backdrop : 'static'
+				});
+			});
+			$("#addModalSubmitBtn").click(function() {
+				
+				//前端校验
+				if(!validate_add_form()){
+					alert("填写的信息不正确");
+					return;
+				}
+				
+				//发送给服务器 
+				$.ajax({
+
+					url : "${APP_PATH}/emp",
+					type : "POST",
+					data : $("#addModal form").serialize(),
+					success : function(result) {
+						//alert(result.msg);
+						//需要关闭模态框 并且来到最后一页显示出刚刚添加的内容
+						to_page(totalRecords);
+						$("#addModal").modal('hide');
+						//可以给一个比较大的数字 或者用总记录数字来标识 总记录数一定比分页数大 因为设置了pagethelper的合理分页 所以这个没关系
+						$("#addModal form")[0].reset();//清空下 下次就不用清空了
+					}
+				
+				});
+			
+			});
+			//change属性等到焦点不属于这个标签的时候才触发
+			$("#empName_add").change(function (){
+				//直接使用data : "empName="+$("#empName_add").val（）得到的结果会导致服务器接收乱码 所以还是先用一个变量保存下为好
+				var empName= $("#empName_add").val();//或者 this.value();
+				//检查员工姓名是不是已经存在了
+				$.ajax({
+					url : "${APP_PATH}/checkUser",
+					type : "post",
+					data : "empName="+empName,
+					success : function(result) {
+						if(result.code==100){
+							//成功
+							show_validate_msg("#empName_add","success","");
+							//姓名存在的话 要修改下本地的全局变量 标记一下
+							isNameUsed = false;
+						}else if (result.code == 200){
+							//失败
+							show_validate_msg("#empName_add","error","姓名已重复");
+							isNameUsed = true;
+						}
+						
+						
+					}
+		
+				});
+				
 				
 			});
+		}
+		
+		function show_validate_msg(ele,status,msg){
+			$(ele).parent().removeClass("has-error has-success");
+			$(ele).next("span").text("");
+			if("success"==status){
+				$(ele).parent().addClass("has-success");
+				$(ele).next("span").text(msg);
+			}else if("error"==status){
+				$(ele).parent().addClass("has-error");
+				$(ele).next("span").text(msg);
+			}
 			
+		}
+		function validate_add_form(){
+			//获取值
+			var empName = $("#empName_add").val();
+			var regName = /^[a-zA-Z0-9\u2E80-\u9FFF_-]{3,16}$/
+			//校验
+			var flag1 = false;
+			flag1 = regName.test(empName);
+			if(!flag1){
+				show_validate_msg("#empName_add","error","用户名只能是3-16个中文英文数字组合");
+				return false;
+			}else{
+				show_validate_msg("#empName_add","success","");
+				
+			}
+			var email =$("#empEmail_add").val();
+			var regEmail = /^[a-z\d]+(\.[a-z\d]+)*@([\da-z](-[\da-z])?)+(\.{1,2}[a-z]+)+$/;
 			
+			var flag2 = false;
+			flag2 =regEmail.test(email);
+			if(!flag2){
+				show_validate_msg("#empEmail_add","error","请输入正确的电子邮箱");
+				return false;
+			}else{
+				show_validate_msg("#empEmail_add","success","");
+				
+			}
+			
+			return flag1&&flag2&&!isNameUsed?true:false;
+		}
+		function getALLdept() {
+			$.ajax({
+				url : "${APP_PATH}/depts",
+				type : "get",
+				success : function(result) {
+					$("#depts").empty();
+					var depts = result.extend.depts;
+					$.each(depts, function() {
+						//在这个方法里面 this就是每个item本身
+						$("#depts").append(
+								$("<option></option>").append(this.deptName)
+										.attr("value", this.deptId));
+					});
+				}
+			});
+
 		}
 		function to_page(pn) {
 			$.ajax({
@@ -212,6 +330,8 @@
 			$("#pageInfoMsg").append(
 					"当前 " + pageInfo.pageNum + "页,总" + pageInfo.pages + "页,总"
 							+ pageInfo.total + "条记录");
+			
+			totalRecords = pageInfo.total;
 		}
 
 		//解析分页条的方法
