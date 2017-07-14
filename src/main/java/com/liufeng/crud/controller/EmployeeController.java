@@ -10,6 +10,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.FieldError;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -61,7 +62,7 @@ public class EmployeeController {
 		return Msg.success().add("pageInfo", page);
 	}
 	
-	
+	//在服务器端使用JSR303校验 第二层防护
 	@ResponseBody
 	@RequestMapping(value="/emp" ,method=RequestMethod.POST)
 	public Msg saveEmp(@Valid Employee employee,BindingResult result) {
@@ -69,10 +70,12 @@ public class EmployeeController {
 		HashMap<String,String> map = new HashMap<String, String>();
 		if(result.hasErrors()) {
 			List<FieldError> fieldErrors = result.getFieldErrors();
+			StringBuffer sb = new StringBuffer();
+			
 			for (FieldError fieldError : fieldErrors) {
-				
+				sb.append(fieldError.getField()+fieldError.getDefaultMessage());
 			}
-			return null;
+			return Msg.error().add("va_name", sb.toString());
 		}else {
 			employeeService.saveEmp(employee);
 			
@@ -81,6 +84,15 @@ public class EmployeeController {
 		
 		
 	}
+	
+	@ResponseBody
+	@RequestMapping(value="/emp/{id}",method=RequestMethod.GET)
+	public Msg getEmp(@PathVariable("id")Integer id) {
+
+		Employee emp = employeeService.getEmp(id);
+		return Msg.success().add("emp", emp);
+	}
+	
 	
 	@RequestMapping("/depts")
 	@ResponseBody

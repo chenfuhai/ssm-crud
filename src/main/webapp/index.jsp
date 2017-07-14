@@ -121,7 +121,7 @@
 							<div class="form-group">
 								<label class="col-sm-2 control-label">部门</label>
 								<div class="col-sm-4">
-									<select class="form-control" id="depts" name="dId">
+									<select class="form-control depts"  name="dId">
 									</select>
 								</div>
 							</div>
@@ -129,15 +129,130 @@
 						</form>
 					</div>
 					<div class="modal-footer">
-						<button type="button" class="btn btn-default" data-dismiss="modal">取消</button>
 						<button type="button" class="btn btn-primary"
 							id="addModalSubmitBtn">保存提交</button>
+						<button type="button" class="btn btn-default" data-dismiss="modal">取消</button>
 					</div>
 				</div>
 			</div>
 		</div>
 		<!-- ======================================================== -->
 
+<!-- =========================员工信息修改的模态框======================= -->
+
+		<div class="modal fade" id="updateModal" tabindex="-1" role="dialog"
+			aria-labelledby="updateModalLable" aria-hidden="true">
+			<div class="modal-dialog">
+				<div class="modal-content">
+					<div class="modal-header">
+						<button type="button" class="close" data-dismiss="modal"
+							aria-hidden="true">&times;</button>
+						<h4 class="modal-title" id="updateModalLable">修改员工信息</h4>
+					</div>
+					<div class="modal-body">
+						<form id="updateForm" class="form-horizontal">
+							<div class="form-group">
+								<label class="col-sm-2 control-label" >员工姓名</label>
+
+								<div class="col-sm-10">
+									<p class="form-control-static" id="empNameUpdateStatic"></p>
+								</div>
+							</div>
+
+							<div class="form-group">
+								<label class="col-sm-2 control-label" for="empEmail_update">Email</label>
+								<div class="col-sm-10">
+									<input type="text" class="form-control" id="empEmail_update"
+										name="email" placeholder="Email">
+										<span class="help-block"></span>
+								</div>
+							</div>
+
+							<div class="form-group">
+								<label class="col-sm-2 control-label">性别</label>
+								<div class="col-sm-10">
+									<label class="radio-inline"> <input type="radio"
+										name="gender" id="gender1_add_input" value="M"
+										checked="checked"> 男
+									</label> <label class="radio-inline"> <input type="radio"
+										name="gender" id="gender2_add_input" value="F"> 女
+									</label>
+								</div>
+							</div>
+
+							<div class="form-group">
+								<label class="col-sm-2 control-label">部门</label>
+								<div class="col-sm-4">
+									<select class="form-control depts"   name="dId">
+									</select>
+								</div>
+							</div>
+
+						</form>
+					</div>
+					<div class="modal-footer">
+						<button type="button" class="btn btn-primary"
+							id="addModalSubmitBtn">保存修改</button>
+						<button type="button" class="btn btn-default" data-dismiss="modal">取消</button>
+					</div>
+				</div>
+			</div>
+		</div>
+		<!-- ======================================================== -->
+
+<!-- =========================员工信息删除的模态框======================= -->
+
+		<div class="modal fade" id="delModal" tabindex="-1" role="dialog"
+			aria-labelledby="updateModalLable" aria-hidden="true">
+			<div class="modal-dialog">
+				<div class="modal-content">
+					<div class="modal-header">
+						<button type="button" class="close" data-dismiss="modal"
+							aria-hidden="true">&times;</button>
+						<h4 class="modal-title" id="delModalLable">删除员工信息</h4>
+					</div>
+					<div class="modal-body">
+						<form id="delForm" class="form-horizontal">
+							<div class="form-group">
+								<label class="col-sm-2 control-label" >员工姓名</label>
+
+								<div class="col-sm-10">
+									<p class="form-control-static" id="empNameDelStatic"></p>
+								</div>
+							</div>
+
+							<div class="form-group">
+								<label class="col-sm-2 control-label" >Email</label>
+								<div class="col-sm-10">
+									<p class="form-control-static" id="empEmailDelStatic"></p>
+								</div>
+							</div>
+
+							<div class="form-group">
+								<label class="col-sm-2 control-label">性别</label>
+								<div class="col-sm-10">
+									<p class="form-control-static" id="empGenderDelStatic"></p>
+								</div>
+							</div>
+
+							<div class="form-group">
+								<label class="col-sm-2 control-label">部门</label>
+								<div class="col-sm-4">
+									<p class="form-control-static" id="empDeptDelStatic"></p>
+								</div>
+							</div>
+
+						</form>
+					</div>
+					<div class="modal-footer">
+						<button type="button" class="btn btn-danger"
+							id="addModalSubmitBtn">确定删除</button>
+						<button type="button" class="btn btn-default" data-dismiss="modal">取消</button>
+					</div>
+				</div>
+			</div>
+		</div>
+		<!-- ======================================================== -->
 
 
 	</div>
@@ -160,6 +275,42 @@
 					backdrop : 'static'
 				});
 			});
+			
+			//按钮是在ajax请求之后才生成的 这个时候按钮还没有生成 所以不能绑定时间
+			//使用ON方法绑定事件 在document中 及实施后来生成的也可以绑定成功
+			$(document).on("click",".btnUpdate",function(){
+				//编辑按钮 获取所有部门 获取其本身的名字
+				getALLdept();
+				//this 指的是当前被点击的按钮 指的是这个事件发生的触发者 不是这个事件的监听器
+				getEmpUpdate($(this).attr("edit_id"));
+				$("#updateModal").modal({
+					backdrop : 'static'
+				});
+			});
+			$(document).on("click",".btnDel",function(){
+				//删除按钮
+				//发送请求 获取各种信息 填入相关的P中
+				getEmpDel($(this).attr("del_id"));
+				$("#delModal").modal({
+					backdrop : 'static'
+				});
+			});
+			/* $(".btnUpdate").click(function(){
+				//编辑按钮
+				alert(123);
+				
+				$("#updateModal").modal({
+					backdrop : 'static'
+				});
+			});
+			$(".btnDel").click(function(){
+				//删除按钮
+				alert(456);
+				$("#updateModal").modal({
+					backdrop : 'static'
+				});
+			}); */
+			
 			$("#addModalSubmitBtn").click(function() {
 				
 				//前端校验
@@ -175,12 +326,20 @@
 					type : "POST",
 					data : $("#addModal form").serialize(),
 					success : function(result) {
+						
+						if (result.code==100) {
 						//alert(result.msg);
 						//需要关闭模态框 并且来到最后一页显示出刚刚添加的内容
 						to_page(totalRecords);
 						$("#addModal").modal('hide');
 						//可以给一个比较大的数字 或者用总记录数字来标识 总记录数一定比分页数大 因为设置了pagethelper的合理分页 所以这个没关系
 						$("#addModal form")[0].reset();//清空下 下次就不用清空了
+							
+						}else if(result.code==200){
+							//失败
+							alert(result.extend.va_name);
+						}
+						
 					}
 				
 				});
@@ -213,6 +372,37 @@
 				});
 				
 				
+			});
+		}
+		
+		
+		function getEmpUpdate(id){
+			//查询并更新修改窗口的员工姓名
+			
+			$.ajax({
+				url : "${APP_PATH}/emp/"+id,
+				type : "get",
+				success : function(result) {
+					if(result.code==100){
+					$("#empNameUpdateStatic").append(result.extend.empName);						
+					}
+				}
+			});
+		}
+		
+		function getEmpDel(id){
+			//查询并更新删除窗口的各项数据
+			$.ajax({
+				url : "${APP_PATH}/emp/"+id,
+				type : "get",
+				success : function(result) {
+					if(result.code==100){
+						$("#empNameDelStatic").append(result.extend.empName);	
+						$("#empEmailDelStatic").append(result.extend.email);	
+						$("#empGenderDelStatic").append(result.extend.gender);	
+						$("#empDeptDelStatic").append(result.extend.department.deptName);	
+					}
+				}
 			});
 		}
 		
@@ -262,11 +452,11 @@
 				url : "${APP_PATH}/depts",
 				type : "get",
 				success : function(result) {
-					$("#depts").empty();
+					$(".depts").empty();
 					var depts = result.extend.depts;
 					$.each(depts, function() {
 						//在这个方法里面 this就是每个item本身
-						$("#depts").append(
+						$(".depts").append(
 								$("<option></option>").append(this.deptName)
 										.attr("value", this.deptId));
 					});
@@ -305,13 +495,15 @@
 				var empDeptNameTd = $("<td></td>").append(
 						item.department.deptName);
 				var btnEdit = $("<button></button>").addClass(
-						"btn btn-primary btn-sm").append(
+						"btn btn-primary btn-sm btnUpdate").append(
 						$("<span></span>").addClass(
-								"glyphicon glyphicon-pencil")).append("编辑");
+								"glyphicon glyphicon-pencil ")).append("编辑");
+				btnEdit.attr("edit_id",item.empId);
 				var btnDel = $("<button></button>").addClass(
-						"btn btn-danger btn-sm").append(
+						"btn btn-danger btn-sm btnDel").append(
 						$("<span></span>").addClass(
 								"glyphicon glyphicon-pencil")).append("删除");
+				btnDel.attr("del_id",item.empId);
 				var btnTd = $("<td></td>").append(btnEdit).append(" ").append(
 						btnDel);
 				//对员工信息进行便利 每次便利都构造一个行添加进表格体中
