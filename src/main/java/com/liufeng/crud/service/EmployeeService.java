@@ -39,7 +39,7 @@ public class EmployeeService {
 
 
 	public Employee getEmp(Integer id) {
-		Employee employee = employeeMapper.selectByPrimaryKey(id);
+		Employee employee =employeeMapper.selectByPrimaryKeyWithDept(id);
 		return employee;
 		
 	}
